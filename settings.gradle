@@ -1,0 +1,2 @@
+include ':app'
+rootProject.name = "Minesweeper 0.1"
