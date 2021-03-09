@@ -49,4 +49,5 @@ public class Menu extends AppCompatActivity {
             startGameIntent.putExtra("difficulty",difficulty);
             startActivity(startGameIntent);
     }
+    //testing comment
 }
