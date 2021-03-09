@@ -9,7 +9,7 @@ import android.widget.Toast;
 public class Game extends AppCompatActivity {
 
     /* Good job Robby
-            --Seth
+            ---Seth
      */
 
     int difficulty;
