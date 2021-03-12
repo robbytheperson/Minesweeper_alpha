@@ -65,4 +65,9 @@ public class Game extends AppCompatActivity {
             }
         }
     }
+
+    public void checkForMine()
+    {
+
+    }
 }
