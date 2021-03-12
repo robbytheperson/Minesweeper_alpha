@@ -21,7 +21,8 @@ public class Game extends AppCompatActivity {
     GridLayout grid;
 
     int difficulty;
-    int dimens;
+    int dimensX;
+    int dimensY;
     int numMines;
 
     Display display;
@@ -29,6 +30,7 @@ public class Game extends AppCompatActivity {
     int screenWidth;
     int screenHeight;
     int gridWidth;
+    int gridHeight;
 
     int mapFiller;
 
@@ -50,7 +52,8 @@ public class Game extends AppCompatActivity {
         screenHeight = displayMetrics.heightPixels;
 
 
-        dimens = 10;
+        dimensX = 10;
+        dimensY = 14;
 
         grid = findViewById(R.id.tileGrid);
         createGrid();
@@ -77,8 +80,8 @@ public class Game extends AppCompatActivity {
 
 
     public void setColors() {
-        for (int i = 0; i < dimens; i++) {
-            for (int j = 0; j < dimens; j++) {
+        for (int i = 0; i < dimensX; i++) {
+            for (int j = 0; j < dimensX; j++) {
                 colorController = !colorController;
             }
         }
@@ -86,9 +89,10 @@ public class Game extends AppCompatActivity {
 
     public void createGrid() {
         gridWidth = (int)(screenWidth * 0.9);
+        gridHeight = (int)(Math.round((1.0 * gridWidth) * ((1.0 * dimensY) / (1.0 * dimensX))));
         ConstraintLayout constraintLayout = findViewById(R.id.constraintL);
         ConstraintSet constraintSet = new ConstraintSet();
-        ConstraintLayout.LayoutParams gridParams = new ConstraintLayout.LayoutParams(gridWidth,gridWidth);
+        ConstraintLayout.LayoutParams gridParams = new ConstraintLayout.LayoutParams(gridWidth,gridHeight);
         grid.setLayoutParams(gridParams);
         constraintSet.clone(constraintLayout);
         constraintSet.connect(R.id.tileGrid,ConstraintSet.TOP,R.id.constraintL,ConstraintSet.TOP,0);
@@ -96,10 +100,10 @@ public class Game extends AppCompatActivity {
         constraintSet.connect(R.id.tileGrid,ConstraintSet.BOTTOM,R.id.constraintL,ConstraintSet.BOTTOM,0);
         constraintSet.connect(R.id.tileGrid,ConstraintSet.RIGHT,R.id.constraintL,ConstraintSet.RIGHT,0);
         constraintSet.applyTo(constraintLayout);
-        grid.setColumnCount(dimens);
-        grid.setRowCount(dimens);
-        for (int i = 0; i < dimens; i++) {
-            for (int j = 0; j < dimens; j++) {
+        grid.setColumnCount((int)dimensX);
+        grid.setRowCount((int)dimensY);
+        for (int i = 0; i < dimensY; i++) {
+            for (int j = 0; j < dimensX; j++) {
                 final int row = i;
                 final int column = j;
 
@@ -114,8 +118,8 @@ public class Game extends AppCompatActivity {
                 GridLayout.LayoutParams params = new GridLayout.LayoutParams();
                 params.rowSpec = GridLayout.spec(row);
                 params.columnSpec = GridLayout.spec(column);
-                params.height = (gridWidth / dimens);
-                params.width = (gridWidth / dimens);
+                params.height = (gridHeight / dimensY);
+                params.width = (gridWidth / dimensX);
                 b.setLayoutParams(params);
 
                 if (column == 0 && row % 2 == 1) colorController = false;
@@ -131,7 +135,6 @@ public class Game extends AppCompatActivity {
 
     public void clickMethod(View v, int row, int column) {
         if (!gameIsOn) {
-            int iterationCounter = 1;
             gameIsOn = true;
         }
     }
