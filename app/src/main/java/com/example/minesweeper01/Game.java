@@ -31,7 +31,8 @@ public class Game extends AppCompatActivity {
     int screenHeight;
     int gridWidth;
     int gridHeight;
-
+    double sizeScaleFactor;
+    
     int mapFiller;
 
     boolean colorController;
@@ -54,6 +55,7 @@ public class Game extends AppCompatActivity {
 
         dimensX = 10;
         dimensY = 14;
+        sizeScaleFactor = 0.9;
 
         grid = findViewById(R.id.tileGrid);
         createGrid();
@@ -88,7 +90,7 @@ public class Game extends AppCompatActivity {
     }
 
     public void createGrid() {
-        gridWidth = (int)(screenWidth * 0.9);
+        gridWidth = (int)(screenWidth * sizeScaleFactor);
         gridHeight = (int)(Math.round((1.0 * gridWidth) * ((1.0 * dimensY) / (1.0 * dimensX))));
         ConstraintLayout constraintLayout = findViewById(R.id.constraintL);
         ConstraintSet constraintSet = new ConstraintSet();
