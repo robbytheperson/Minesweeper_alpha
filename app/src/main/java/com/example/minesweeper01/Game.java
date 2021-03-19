@@ -46,6 +46,9 @@ public class Game extends AppCompatActivity {
     Button[][] gridButtons;
     int[] viableTiles;
 
+    //Booleans for shovel and flag mode
+    boolean shovelMode = true;
+    boolean flagMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,10 +202,17 @@ public class Game extends AppCompatActivity {
             }
         }
         else {
-            for (int minePlacement : minePlacements) {
-                if (Integer.parseInt(v.getTag().toString()) == minePlacement) {
-                    Toast.makeText(this, "Mine!", Toast.LENGTH_SHORT).show();
-                    break;
+            if (flagMode == true)
+            {
+                //adding flag code here
+            }
+            else
+            {
+                for (int minePlacement : minePlacements) {
+                    if (Integer.parseInt(v.getTag().toString()) == minePlacement) {
+                        Toast.makeText(this, "Mine!", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
                 }
             }
         }
@@ -211,5 +221,17 @@ public class Game extends AppCompatActivity {
 
     public void gameOver() {
 
+    }
+
+    public void setFlagMode()
+    {
+        flagMode = true;
+        shovelMode = false;
+    }
+
+    public void setShovelMode()
+    {
+        flagMode = false;
+        shovelMode = true;
     }
 }
