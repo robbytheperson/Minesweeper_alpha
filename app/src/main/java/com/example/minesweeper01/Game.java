@@ -39,6 +39,7 @@ public class Game extends AppCompatActivity {
 
     boolean colorController;
     boolean gameHasStarted;
+    boolean shovelBeingUsed;
 
     int[] blacklisted;
     int[] minePlacements;
