@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Minesweeper 0.1</string>
-    <string name="start">Start</string>
+    <string name="start">New Game</string>
+    <string name="instructions">How To Play</string>
     <string name="easy">Easy</string>
     <string name="med">Medium</string>
     <string name="hard">Hard</string>
