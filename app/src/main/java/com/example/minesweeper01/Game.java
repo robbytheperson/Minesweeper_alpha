@@ -8,10 +8,6 @@ import android.widget.Toast;
 
 public class Game extends AppCompatActivity {
 
-    /* Good job Robby
-            ---Seth
-     */
-
     int difficulty;
     int dimens;
     int numMines;
