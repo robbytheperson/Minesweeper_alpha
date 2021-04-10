@@ -9,9 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Minesweeper01">
-        <activity
-            android:name=".Settings"
-            android:label="@string/title_activity_settings"></activity>
+        <activity android:name=".HowToPlay"></activity>
         <activity android:name=".Menu">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
