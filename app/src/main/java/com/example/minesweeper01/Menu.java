@@ -9,12 +9,14 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import java.io.InputStream;
+
 public class Menu extends AppCompatActivity {
 
     RadioGroup difficultyButtons;
     int difficulty;
 
-    Button startButton;
+    Button startButton, helpButton;
 
 
     @Override
@@ -26,6 +28,7 @@ public class Menu extends AppCompatActivity {
         difficultyButtons.setOnCheckedChangeListener(difficultyListener);
 
         startButton = findViewById(R.id.start);
+        helpButton = findViewById(R.id.helpButton);
     }
 
     private RadioGroup.OnCheckedChangeListener difficultyListener = new RadioGroup.OnCheckedChangeListener() {
@@ -49,5 +52,13 @@ public class Menu extends AppCompatActivity {
             startGameIntent.putExtra("difficulty",difficulty);
             startActivity(startGameIntent);
     }
+
+    public void helpScreen(View v)
+    {
+        Intent helpScreenIntent = new Intent(Menu.this, HowToPlay.class);
+        startActivity(helpScreenIntent);
+    }
     //testing comment
+
+
 }
