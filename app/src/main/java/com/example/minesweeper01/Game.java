@@ -4,17 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Game extends AppCompatActivity {
 
@@ -23,6 +22,7 @@ public class Game extends AppCompatActivity {
     int difficulty;
     int dimensX;
     int dimensY;
+    int numTiles;
     int numMines;
 
     Display display;
@@ -39,17 +39,17 @@ public class Game extends AppCompatActivity {
 
     boolean colorController;
     boolean gameHasStarted;
-    boolean shovelBeingUsed;
 
     int[] blacklisted;
     int[] minePlacements;
     int[][] imaginaryGrid;
     Button[][] gridButtons;
-    int[] viableTiles;
+    ArrayList<Integer> viableTiles;
+    Tile[] tileObjects;
 
     //Booleans for shovel and flag mode
-    boolean shovelMode = true;
-    boolean flagMode = false;
+    boolean shovelMode;
+    boolean flagMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,18 +63,22 @@ public class Game extends AppCompatActivity {
         screenHeight = displayMetrics.heightPixels;
 
 
-        dimensX = 5;
-        dimensY = 5;
-        sizeScaleFactorForWidth = 0.9;
+        dimensX = 11;
+        dimensY = 18;
+        numTiles = dimensX * dimensY;
+        sizeScaleFactorForWidth = 0.8;
         sizeScaleFactorForHeight = 0.8;
         mapFiller = 1;
         numMines = 10;
-        minePlacements = new int[numMines];
+        minePlacements = new int[10];
         gridButtons = new Button[dimensX][dimensY];
         imaginaryGrid = new int[dimensX][dimensY];
         blacklisted = new int[9];
-        viableTiles = new int[dimensX * dimensY - blacklisted.length];
+        viableTiles = new ArrayList<>();
+        tileObjects = new Tile[numTiles];
         blacklistedController = 0;
+        shovelMode = true;
+        flagMode = false;
 
         grid = findViewById(R.id.tileGrid);
         createGrid();
@@ -154,10 +158,11 @@ public class Game extends AppCompatActivity {
                 else b.setBackground(getResources().getDrawable(R.drawable.light_green_tile));
 
                 b.setTag(mapFiller);
-                imaginaryGrid[row][column] = mapFiller;
+                imaginaryGrid[column][row] = mapFiller;
+                tileObjects[mapFiller - 1] = new Tile(mapFiller);
 
                 colorController = !colorController;
-                gridButtons[i][j] = b;
+                gridButtons[j][i] = b;
                 grid.addView(b);
                 mapFiller++;
             }
@@ -178,8 +183,7 @@ public class Game extends AppCompatActivity {
                     }
                 }
 
-                int iterationTracker = 0;
-                for (int i = 1; i < dimensX * dimensY; i++) {
+                for (int i = 1; i < numTiles; i++) {
                     boolean viableTile = true;
                     for (int value : blacklisted) {
                         if (value == i) {
@@ -188,16 +192,12 @@ public class Game extends AppCompatActivity {
                         }
                     }
                     if (viableTile) {
-                        viableTiles[iterationTracker] = i;
-                        iterationTracker++;
+                        viableTiles.add(i);
                     }
-
                 }
 
-                for (int i = 0; i < minePlacements.length; i++) {
-                    int key = (int)(Math.random() * viableTiles.length);
-                    minePlacements[i] = viableTiles[key];
-                }
+                generateMines();
+                scanForSurroundingTiles();
 
                 gameHasStarted = true;
             }
@@ -209,30 +209,134 @@ public class Game extends AppCompatActivity {
             }
             else
             {
-                for (int minePlacement : minePlacements) {
-                    if (Integer.parseInt(v.getTag().toString()) == minePlacement) {
-                        Toast.makeText(this, "Mine!", Toast.LENGTH_SHORT).show();
-                        break;
+                if (tileObjects[Integer.parseInt(v.getTag().toString()) - 1].getHasMine()) {
+                    Toast.makeText(this, "Mine!", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(this, tileObjects[Integer.parseInt(v.getTag().toString()) - 1].getNumSurroundingMines(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+        //clearOpenTiles(Integer.parseInt(v.getTag().toString()));
+    }
+
+    private void clearOpenTiles(int selectedTile) {
+        boolean openSpaceExists = true;
+
+        while (openSpaceExists) {
+            if (!tileObjects[selectedTile].hasBeenChecked()) {
+                if (tileObjects[selectedTile].getNumSurroundingMines() == 0)
+                {
+
+                }
+                else if (tileObjects[selectedTile].getNumSurroundingMines() == 1) {
+
+                }
+                else if (tileObjects[selectedTile].getNumSurroundingMines() == 2) {
+
+                }
+                else if (tileObjects[selectedTile].getNumSurroundingMines() == 3) {
+
+                }
+                else if (tileObjects[selectedTile].getNumSurroundingMines() == 4) {
+
+                }
+                else if (tileObjects[selectedTile].getNumSurroundingMines() == 5) {
+
+                }
+                else if (tileObjects[selectedTile].getNumSurroundingMines() == 6) {
+
+                }
+                else if (tileObjects[selectedTile].getNumSurroundingMines() == 7) {
+
+                }
+                else if (tileObjects[selectedTile].getNumSurroundingMines() == 8) {
+
+                }
+            }
+        }
+    }
+
+    private void scanForSurroundingTiles() {
+        for (int i = 0; i < dimensY; i++) {
+            for (int j = 0; j < dimensX; j++) {
+                int scanMineNumber = (i * dimensX) + j;
+                if (!tileObjects[scanMineNumber].getHasMine()) {
+                    if (j > 0) {
+                        if (i > 0) {
+                            if (tileObjects[scanMineNumber - dimensX - 1].getHasMine()) {
+                                tileObjects[scanMineNumber].addNumSurroundingMines();
+                            }
+                        }
+
+                        if (i < dimensY - 1) {
+                            if (tileObjects[scanMineNumber + dimensX - 1].getHasMine()) {
+                                tileObjects[scanMineNumber].addNumSurroundingMines();
+                            }
+                        }
+
+                        if (tileObjects[scanMineNumber - 1].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        }
+                    }
+
+                    if (i < dimensY - 1)
+                    {
+                        if (j < dimensX - 1)
+                        {
+                            if (tileObjects[scanMineNumber + dimensX + 1].getHasMine()) {
+                                tileObjects[scanMineNumber].addNumSurroundingMines();
+                            }
+                        }
+                        if (tileObjects[scanMineNumber + dimensX].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        }
+                    }
+
+                    if (i > 0) {
+                        if (j < dimensX - 1) {
+                            if (tileObjects[scanMineNumber - dimensX + 1].getHasMine()) {
+                                tileObjects[scanMineNumber].addNumSurroundingMines();
+                            }
+                        }
+
+                        if (tileObjects[scanMineNumber - dimensX].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        }
+                    }
+
+                    if (j < dimensX - 1) {
+                        if (tileObjects[scanMineNumber + 1].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        }
                     }
                 }
             }
         }
     }
 
+    private void generateMines() {
+        Collections.shuffle(viableTiles);
+        for (int j = 0; j < numMines; j++) {
+            minePlacements[j] = viableTiles.get(j);
+            tileObjects[viableTiles.get(j)].setHasMine(true);
+        }
+    }
 
-    public void gameOver() {
+    private void gameOver() {
 
     }
 
-    public void setFlagMode()
+    private void setFlagMode()
     {
         flagMode = true;
         shovelMode = false;
     }
 
-    public void setShovelMode()
+    private void setShovelMode()
     {
         flagMode = false;
         shovelMode = true;
     }
+
 }
