@@ -4,17 +4,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Point;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Game extends AppCompatActivity {
 
@@ -23,6 +23,7 @@ public class Game extends AppCompatActivity {
     int difficulty;
     int dimensX;
     int dimensY;
+    int numTiles;
     int numMines;
 
     Display display;
@@ -33,20 +34,25 @@ public class Game extends AppCompatActivity {
     int gridHeight;
     double sizeScaleFactorForWidth;
     double sizeScaleFactorForHeight;
-    
+
     int mapFiller;
     int blacklistedController;
 
     boolean colorController;
     boolean gameHasStarted;
-    boolean shovelBeingUsed;
 
     int[] blacklisted;
     int[] minePlacements;
     int[][] imaginaryGrid;
+    int spacesOpened;
     Button[][] gridButtons;
-    int[] viableTiles;
+    ArrayList<Integer> viableTiles;
+    ArrayList<Integer> tilesNeedingCheck;
+    Tile[] tileObjects;
 
+    //Booleans for shovel and flag mode
+    boolean shovelMode;
+    boolean flagMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,24 +66,28 @@ public class Game extends AppCompatActivity {
         screenHeight = displayMetrics.heightPixels;
 
 
-        dimensX = 5;
-        dimensY = 5;
-        sizeScaleFactorForWidth = 0.9;
+        dimensX = 9;
+        dimensY = 16;
+        numTiles = dimensX * dimensY;
+        sizeScaleFactorForWidth = 0.8;
         sizeScaleFactorForHeight = 0.8;
-        mapFiller = 1;
-        numMines = 10;
+        mapFiller = 0;
+        spacesOpened = 0;
+        difficulty = getIntent().getIntExtra("difficulty", 1);
+        setDifficulty();
         minePlacements = new int[numMines];
         gridButtons = new Button[dimensX][dimensY];
         imaginaryGrid = new int[dimensX][dimensY];
         blacklisted = new int[9];
-        viableTiles = new int[dimensX * dimensY - blacklisted.length];
+        viableTiles = new ArrayList<>();
+        tilesNeedingCheck = new ArrayList<>();
+        tileObjects = new Tile[numTiles];
         blacklistedController = 0;
+        shovelMode = true;
+        flagMode = false;
 
         grid = findViewById(R.id.tileGrid);
         createGrid();
-
-        difficulty = getIntent().getIntExtra("difficulty",1);
-        setDifficulty();
 
         colorController = true;
 
@@ -87,11 +97,11 @@ public class Game extends AppCompatActivity {
 
     public void setDifficulty() {
         if (difficulty == 0) {
-            numMines = 10;
+            numMines = (int)(dimensX * dimensY * 0.125);
         } else if (difficulty == 1) {
-            numMines = 15;
+            numMines = (int)(dimensX * dimensY * 0.16);
         } else if (difficulty == 2) {
-            numMines = 18;
+            numMines = (int)(dimensX * dimensY * 0.2);
         }
     }
 
@@ -105,23 +115,23 @@ public class Game extends AppCompatActivity {
     }
 
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     public void createGrid() {
-        gridWidth = (int)(screenWidth * sizeScaleFactorForWidth);
-        gridHeight = (int)(Math.round((1.0 * gridWidth) * ((1.0 * dimensY) / (1.0 * dimensX))));
-        if (gridHeight > (screenHeight * sizeScaleFactorForHeight))
-        {
-            gridHeight = (int)(screenHeight * sizeScaleFactorForHeight);
-            gridWidth = (int)(Math.round((1.0 * gridHeight) * ((1.0 * dimensX) / (1.0 * dimensY))));
+        gridWidth = (int) (screenWidth * sizeScaleFactorForWidth);
+        gridHeight = (int) (Math.round((1.0 * gridWidth) * ((1.0 * dimensY) / (1.0 * dimensX))));
+        if (gridHeight > (screenHeight * sizeScaleFactorForHeight)) {
+            gridHeight = (int) (screenHeight * sizeScaleFactorForHeight);
+            gridWidth = (int) (Math.round((1.0 * gridHeight) * ((1.0 * dimensX) / (1.0 * dimensY))));
         }
         ConstraintLayout constraintLayout = findViewById(R.id.constraintL);
         ConstraintSet constraintSet = new ConstraintSet();
-        ConstraintLayout.LayoutParams gridParams = new ConstraintLayout.LayoutParams(gridWidth,gridHeight);
+        ConstraintLayout.LayoutParams gridParams = new ConstraintLayout.LayoutParams(gridWidth, gridHeight);
         grid.setLayoutParams(gridParams);
         constraintSet.clone(constraintLayout);
-        constraintSet.connect(R.id.tileGrid,ConstraintSet.TOP,R.id.constraintL,ConstraintSet.TOP,0);
-        constraintSet.connect(R.id.tileGrid,ConstraintSet.LEFT,R.id.constraintL,ConstraintSet.LEFT,0);
-        constraintSet.connect(R.id.tileGrid,ConstraintSet.BOTTOM,R.id.constraintL,ConstraintSet.BOTTOM,0);
-        constraintSet.connect(R.id.tileGrid,ConstraintSet.RIGHT,R.id.constraintL,ConstraintSet.RIGHT,0);
+        constraintSet.connect(R.id.tileGrid, ConstraintSet.TOP, R.id.constraintL, ConstraintSet.TOP, 0);
+        constraintSet.connect(R.id.tileGrid, ConstraintSet.LEFT, R.id.constraintL, ConstraintSet.LEFT, 0);
+        constraintSet.connect(R.id.tileGrid, ConstraintSet.BOTTOM, R.id.constraintL, ConstraintSet.BOTTOM, 0);
+        constraintSet.connect(R.id.tileGrid, ConstraintSet.RIGHT, R.id.constraintL, ConstraintSet.RIGHT, 0);
         constraintSet.applyTo(constraintLayout);
         grid.setColumnCount(dimensX);
         grid.setRowCount(dimensY);
@@ -147,14 +157,16 @@ public class Game extends AppCompatActivity {
 
                 if (column == 0 && row % 2 == 1) colorController = false;
                 if (column == 0 && row % 2 == 0) colorController = true;
-                if (colorController) b.setBackground(getResources().getDrawable(R.drawable.dark_green_tile));
+                if (colorController)
+                    b.setBackground(getResources().getDrawable(R.drawable.dark_green_tile));
                 else b.setBackground(getResources().getDrawable(R.drawable.light_green_tile));
 
                 b.setTag(mapFiller);
-                imaginaryGrid[row][column] = mapFiller;
+                imaginaryGrid[column][row] = mapFiller;
+                tileObjects[mapFiller] = new Tile(mapFiller, dimensX);
 
                 colorController = !colorController;
-                gridButtons[i][j] = b;
+                gridButtons[j][i] = b;
                 grid.addView(b);
                 mapFiller++;
             }
@@ -165,7 +177,7 @@ public class Game extends AppCompatActivity {
     public void clickMethod(View v, int row, int column) {
         int clickedTile = Integer.parseInt(v.getTag().toString());
         if (!gameHasStarted) {
-            if (row > 0 && column > 0 && row < (dimensX - 1) && column < (dimensY - 1)) {
+            if (row > 0 && column > 0 && row < (dimensY - 1) && column < (dimensX - 1)) {
                 for (int i = 0; i < dimensX; i++) {
                     for (int j = 0; j < dimensY; j++) {
                         if (2 > Math.abs((imaginaryGrid[i][j]) - clickedTile) || 2 > Math.abs((imaginaryGrid[i][j]) - (clickedTile - dimensX)) || 2 > Math.abs((imaginaryGrid[i][j]) - (clickedTile + dimensX))) {
@@ -175,8 +187,7 @@ public class Game extends AppCompatActivity {
                     }
                 }
 
-                int iterationTracker = 0;
-                for (int i = 1; i < dimensX * dimensY; i++) {
+                for (int i = 1; i < numTiles; i++) {
                     boolean viableTile = true;
                     for (int value : blacklisted) {
                         if (value == i) {
@@ -185,32 +196,217 @@ public class Game extends AppCompatActivity {
                         }
                     }
                     if (viableTile) {
-                        viableTiles[iterationTracker] = i;
-                        iterationTracker++;
+                        viableTiles.add(i);
                     }
-
                 }
 
-                for (int i = 0; i < minePlacements.length; i++) {
-                    int key = (int)(Math.random() * viableTiles.length);
-                    minePlacements[i] = viableTiles[key];
-                }
+                generateMines();
+                scanForSurroundingTiles();
 
                 gameHasStarted = true;
             }
+        } else {
+            if (flagMode == true) {
+                //adding flag code here
+            } else {
+                if (tileObjects[Integer.parseInt(v.getTag().toString())].getHasMine()) {
+                    //Toast.makeText(this, "Mine!", Toast.LENGTH_SHORT).show();
+                } else {
+                    //Toast.makeText(this, String.valueOf(tileObjects[Integer.parseInt(v.getTag().toString()) - 1].getNumSurroundingMines()), Toast.LENGTH_SHORT).show();
+                }
+            }
         }
-        else {
-            for (int minePlacement : minePlacements) {
-                if (Integer.parseInt(v.getTag().toString()) == minePlacement) {
-                    Toast.makeText(this, "Mine!", Toast.LENGTH_SHORT).show();
-                    break;
+        clearOpenTiles(Integer.parseInt(v.getTag().toString()), row, column);
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private void clearOpenTiles(int selectedTile, int row, int column) {
+
+        if (!tileObjects[selectedTile].hasBeenChecked()) {
+            if (tileObjects[selectedTile].getNumSurroundingMines() == 0) {
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.zero));
+            } else if (tileObjects[selectedTile].getNumSurroundingMines() == 1) {
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.one));
+            } else if (tileObjects[selectedTile].getNumSurroundingMines() == 2) {
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.two));
+            } else if (tileObjects[selectedTile].getNumSurroundingMines() == 3) {
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.three));
+            } else if (tileObjects[selectedTile].getNumSurroundingMines() == 4) {
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.four));
+            } else if (tileObjects[selectedTile].getNumSurroundingMines() == 5) {
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.five));
+            } else if (tileObjects[selectedTile].getNumSurroundingMines() == 6) {
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.six));
+            } else if (tileObjects[selectedTile].getNumSurroundingMines() == 7) {
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.seven));
+            } else if (tileObjects[selectedTile].getNumSurroundingMines() == 8) {
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.eight));
+            } else {
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.eight));
+            }
+            tileObjects[selectedTile].setHasBeenChecked(true);
+            for (int i = 0; i < tileObjects[selectedTile].getExistingNeighbors().size(); i++) {
+                if (!tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].hasBeenChecked() && tileObjects[selectedTile].getNumSurroundingMines() == 0) {
+
+                    if (tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getNumSurroundingMines() == 0) {
+                        gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
+                                [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.zero));
+                        boolean isUnique = true;
+                        for (int b = 0; b < tilesNeedingCheck.size(); b++) {
+                            if (tilesNeedingCheck.get(b).equals(tileObjects[selectedTile].getExistingNeighbors().get(i))) {
+                                isUnique = false;
+                                break;
+                            }
+                        }
+                        if (isUnique) {
+                            tilesNeedingCheck.add(tileObjects[selectedTile].getExistingNeighbors().get(i));
+                        }
+                    } else if (tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getNumSurroundingMines() == 1) {
+                        gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
+                                [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.one));
+                    } else if (tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getNumSurroundingMines() == 2) {
+                        gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
+                                [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.two));
+                    } else if (tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getNumSurroundingMines() == 3) {
+                        gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
+                                [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.three));
+                    } else if (tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getNumSurroundingMines() == 4) {
+                        gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
+                                [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.four));
+                    } else if (tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getNumSurroundingMines() == 5) {
+                        gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
+                                [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.five));
+                    } else if (tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getNumSurroundingMines() == 6) {
+                        gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
+                                [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.six));
+                    } else if (tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getNumSurroundingMines() == 7) {
+                        gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
+                                [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.seven));
+                    } else if (tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getNumSurroundingMines() == 8) {
+                        gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
+                                [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.eight));
+                    }
+                }
+            }
+            if (tilesNeedingCheck.size() > spacesOpened) {
+                selectedTile = tilesNeedingCheck.get(spacesOpened);
+                spacesOpened++;
+                column = tileObjects[selectedTile].getColumn();
+                row = tileObjects[selectedTile].getRow();
+                if (spacesOpened <= tilesNeedingCheck.size()) {
+                    clearOpenTiles(selectedTile, row, column);
+                } else {
+                    spacesOpened = 0;
+                    tilesNeedingCheck.clear();
+                }
+            }
+        }
+        //Toast.makeText(this, "This tile " + "(" + selectedTile + ")" + " has already already been checked.", Toast.LENGTH_SHORT).show();
+
+    }
+
+    private void scanForSurroundingTiles() {
+        for (int i = 0; i < dimensY; i++) {
+            for (int j = 0; j < dimensX; j++) {
+                int scanMineNumber = (i * dimensX) + j;
+                if (!tileObjects[scanMineNumber].getHasMine()) {
+                    if (i > 0 && j > 0) {
+                        //Top left
+                        if (tileObjects[scanMineNumber - dimensX - 1].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        } else
+                            tileObjects[scanMineNumber].addExistingNeighbors(scanMineNumber - dimensX - 1);
+                    }
+
+                    if (i > 0) {
+                        //Top
+                        if (tileObjects[scanMineNumber - dimensX].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        } else {
+                            tileObjects[scanMineNumber].addExistingNeighbors(scanMineNumber - dimensX);
+                            tileObjects[scanMineNumber].addCardinalNeighbor(scanMineNumber - dimensX);
+                        }
+                    }
+
+                    if (j < dimensX - 1 && i > 0) {
+                        //Top right
+                        if (tileObjects[scanMineNumber - dimensX + 1].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        } else
+                            tileObjects[scanMineNumber].addExistingNeighbors(scanMineNumber - dimensX + 1);
+                    }
+
+                    if (j > 0) {
+                        //Left
+                        if (tileObjects[scanMineNumber - 1].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        } else {
+                            tileObjects[scanMineNumber].addExistingNeighbors(scanMineNumber - 1);
+                            tileObjects[scanMineNumber].addCardinalNeighbor(scanMineNumber - 1);
+                        }
+                    }
+
+                    if (j < dimensX - 1) {
+                        //Right
+                        if (tileObjects[scanMineNumber + 1].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        } else {
+                            tileObjects[scanMineNumber].addExistingNeighbors(scanMineNumber + 1);
+                            tileObjects[scanMineNumber].addCardinalNeighbor(scanMineNumber + 1);
+                        }
+                    }
+
+                    if (j > 0 && i < dimensY - 1) {
+                        //Bottom left
+                        if (tileObjects[scanMineNumber + dimensX - 1].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        } else
+                            tileObjects[scanMineNumber].addExistingNeighbors(scanMineNumber + dimensX - 1);
+                    }
+
+                    if (i < dimensY - 1) {
+                        //Bottom
+                        if (tileObjects[scanMineNumber + dimensX].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        } else {
+                            tileObjects[scanMineNumber].addExistingNeighbors(scanMineNumber + dimensX);
+                            tileObjects[scanMineNumber].addCardinalNeighbor(scanMineNumber + dimensX);
+                        }
+                    }
+
+                    if (j < dimensX - 1 && i < dimensY - 1) {
+                        //Bottom right
+                        if (tileObjects[scanMineNumber + dimensX + 1].getHasMine()) {
+                            tileObjects[scanMineNumber].addNumSurroundingMines();
+                        } else
+                            tileObjects[scanMineNumber].addExistingNeighbors(scanMineNumber + dimensX + 1);
+                    }
                 }
             }
         }
     }
 
+    private void generateMines() {
+        Collections.shuffle(viableTiles);
+        for (int j = 0; j < numMines; j++) {
+            minePlacements[j] = viableTiles.get(j);
+            tileObjects[viableTiles.get(j)].setHasMine(true);
+            tileObjects[viableTiles.get(j)].setNumSurroundingMines(9);
+        }
+    }
 
-    public void gameOver() {
+    private void gameOver() {
 
     }
+
+    private void setFlagMode() {
+        flagMode = true;
+        shovelMode = false;
+    }
+
+    private void setShovelMode() {
+        flagMode = false;
+        shovelMode = true;
+    }
+
 }
