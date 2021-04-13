@@ -408,6 +408,7 @@ public class Game extends AppCompatActivity {
     private void setShovelMode() {
         flagMode = false;
         shovelMode = true;
+        //hi
     }
 
 }
