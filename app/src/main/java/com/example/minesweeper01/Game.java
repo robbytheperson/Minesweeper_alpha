@@ -221,6 +221,7 @@ public class Game extends AppCompatActivity {
 
     public void gameOver() {
 
+
     }
 
     public void setFlagMode()
