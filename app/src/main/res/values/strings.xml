@@ -23,4 +23,16 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="settings">Settings</string>
+    <string name="difficulty">Difficulty:</string>
+    <string name="powerups">Power-ups:</string>
+    <string name="how_to_play">How To Play Minesweeper</string>
+    <string name="how_to_play_desc">Minesweeper is a fun and easy game where the objective is to try and clear
+    the game board of all empty spaces without hitting any mines. To begin the game, you simply click anywhere on
+    the board and a space will automatically free up. Each number resembles the amount of mines that are around its
+    area. Imagine that a square box surrounds each number. The number displayed showcases the amount of mines in that
+    box. In order to keep track of where you think mines are located, you can place down a red flag to remind yourself
+    not to tap there. But if you hit a mine, it\'s game over. Additionally, if power-ups are enabled in settings, you can
+    use features like 50/50 to clear up half the board and second chance to continue the game even after hitting a mine.
+    These power-ups will appear randomly across the board.</string>
 </resources>
