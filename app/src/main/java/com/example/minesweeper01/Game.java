@@ -11,7 +11,6 @@ import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -148,6 +147,14 @@ public class Game extends AppCompatActivity {
                     }
                 });
 
+                b.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        longClick(v, row, column);
+                        return true;
+                    }
+                });
+
                 GridLayout.LayoutParams params = new GridLayout.LayoutParams();
                 params.rowSpec = GridLayout.spec(row);
                 params.columnSpec = GridLayout.spec(column);
@@ -157,6 +164,7 @@ public class Game extends AppCompatActivity {
 
                 if (column == 0 && row % 2 == 1) colorController = false;
                 if (column == 0 && row % 2 == 0) colorController = true;
+                tileObjects[mapFiller].setLight(colorController);
                 if (colorController)
                     b.setBackground(getResources().getDrawable(R.drawable.dark_green_tile));
                 else b.setBackground(getResources().getDrawable(R.drawable.light_green_tile));
@@ -409,6 +417,14 @@ public class Game extends AppCompatActivity {
         flagMode = false;
         shovelMode = true;
         //hi
+    }
+
+    public void longClick(View v, int row, int column) {
+        if (tileObjects[Integer.parseInt(v.getTag().toString())].isLight()) {
+            gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.lightflag));
+        } else {
+            gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.darkflag));
+        }
     }
 
 }
