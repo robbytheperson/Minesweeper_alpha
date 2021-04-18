@@ -14,6 +14,8 @@ public class Tile {
     private boolean hasBeenChecked;
     private ArrayList<Integer> existingNeighbors;
     private ArrayList<Integer> cardinalNeighbors;
+    private boolean hasFlag;
+    private boolean isLight;
 
     public Tile(int tileNumber, int dimensX) {
         this.dimensX = dimensX;
@@ -26,6 +28,16 @@ public class Tile {
         numSurroundingMines = 0;
         existingNeighbors = new ArrayList<>();
         cardinalNeighbors = new ArrayList<>();
+        hasFlag = false;
+        isLight = false;
+    }
+
+    public void setLight(boolean light) {
+        isLight = light;
+    }
+
+    public boolean isLight() {
+        return isLight;
     }
 
     public void addExistingNeighbors(int neighborID) {
