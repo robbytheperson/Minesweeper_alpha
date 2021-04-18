@@ -36,14 +36,13 @@ public class Game extends AppCompatActivity {
     double sizeScaleFactorForHeight;
 
     int mapFiller;
-    int blacklistedController;
 
     boolean colorController;
     boolean gameHasStarted;
 
-    int[] blacklisted;
+    ArrayList<Integer> blacklisted;
     int[] minePlacements;
-    int[][] imaginaryGrid;
+    int[][] coordsToNumber;
     int spacesOpened;
     Button[][] gridButtons;
     ArrayList<Integer> viableTiles;
@@ -77,40 +76,28 @@ public class Game extends AppCompatActivity {
         setDifficulty();
         minePlacements = new int[numMines];
         gridButtons = new Button[dimensX][dimensY];
-        imaginaryGrid = new int[dimensX][dimensY];
-        blacklisted = new int[9];
+        coordsToNumber = new int[dimensX][dimensY];
+        blacklisted = new ArrayList<>();
         viableTiles = new ArrayList<>();
         tilesNeedingCheck = new ArrayList<>();
         tileObjects = new Tile[numTiles];
-        blacklistedController = 0;
+        colorController = true;
+        gameHasStarted = false;
         shovelMode = true;
         flagMode = false;
 
         grid = findViewById(R.id.tileGrid);
         createGrid();
-
-        colorController = true;
-
-        setColors();
     }
 
 
     public void setDifficulty() {
         if (difficulty == 0) {
-            numMines = (int)(dimensX * dimensY * 0.125);
+            numMines = (int) (dimensX * dimensY * 0.125);
         } else if (difficulty == 1) {
-            numMines = (int)(dimensX * dimensY * 0.16);
+            numMines = (int) (dimensX * dimensY * 0.16);
         } else if (difficulty == 2) {
-            numMines = (int)(dimensX * dimensY * 0.2);
-        }
-    }
-
-
-    public void setColors() {
-        for (int i = 0; i < dimensX; i++) {
-            for (int j = 0; j < dimensX; j++) {
-                colorController = !colorController;
-            }
+            numMines = (int) (dimensX * dimensY * 0.2);
         }
     }
 
@@ -147,6 +134,13 @@ public class Game extends AppCompatActivity {
                         clickMethod(view, row, column);
                     }
                 });
+                b.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        longClick(view, row, column);
+                        return true;
+                    }
+                });
 
                 GridLayout.LayoutParams params = new GridLayout.LayoutParams();
                 params.rowSpec = GridLayout.spec(row);
@@ -161,14 +155,41 @@ public class Game extends AppCompatActivity {
                     b.setBackground(getResources().getDrawable(R.drawable.dark_green_tile));
                 else b.setBackground(getResources().getDrawable(R.drawable.light_green_tile));
 
-                b.setTag(mapFiller);
-                imaginaryGrid[column][row] = mapFiller;
-                tileObjects[mapFiller] = new Tile(mapFiller, dimensX);
 
-                colorController = !colorController;
+                b.setTag(mapFiller);
+                coordsToNumber[column][row] = mapFiller;
+                tileObjects[mapFiller] = new Tile(mapFiller, dimensX);
+                tileObjects[mapFiller].setDark(colorController);
+
                 gridButtons[j][i] = b;
                 grid.addView(b);
                 mapFiller++;
+                colorController = !colorController;
+            }
+        }
+    }
+
+    private void longClick(View v, int row, int column) {
+        int longClickedTile = Integer.parseInt((v.getTag().toString()));
+
+        if (!gameHasStarted) {
+            clickMethod(v, row, column);
+        } else {
+            if (!tileObjects[longClickedTile].getHasFlag()) {
+                if (tileObjects[longClickedTile].getIsCovered()) {
+                    if (tileObjects[longClickedTile].isDark()) {
+                        gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.dark_green_flag));
+                    } else {
+                        gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.light_green_flag));
+                    }
+                    tileObjects[longClickedTile].setHasFlag(true);
+                }
+            } else {
+                if (tileObjects[longClickedTile].isDark()) {
+                    gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.dark_green_tile));
+                } else {
+                    gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.light_green_tile));
+                }
             }
         }
     }
@@ -176,21 +197,54 @@ public class Game extends AppCompatActivity {
 
     public void clickMethod(View v, int row, int column) {
         int clickedTile = Integer.parseInt(v.getTag().toString());
-        if (!gameHasStarted) {
-            if (row > 0 && column > 0 && row < (dimensY - 1) && column < (dimensX - 1)) {
-                for (int i = 0; i < dimensX; i++) {
-                    for (int j = 0; j < dimensY; j++) {
-                        if (2 > Math.abs((imaginaryGrid[i][j]) - clickedTile) || 2 > Math.abs((imaginaryGrid[i][j]) - (clickedTile - dimensX)) || 2 > Math.abs((imaginaryGrid[i][j]) - (clickedTile + dimensX))) {
-                            blacklisted[blacklistedController] = imaginaryGrid[i][j];
-                            blacklistedController++;
-                        }
-                    }
+        if (!tileObjects[clickedTile].getHasFlag()) {
+            if (!gameHasStarted) {
+                blacklisted.add(clickedTile);
+
+                if (column > 0 && row > 0) {
+                    //Top left
+                    blacklisted.add(clickedTile - dimensX - 1);
                 }
 
-                for (int i = 1; i < numTiles; i++) {
+                if (row > 0) {
+                    //Top
+                    blacklisted.add(clickedTile - dimensX);
+                }
+
+                if (column < dimensX - 1 && row > 0) {
+                    //Top right
+                    blacklisted.add(clickedTile - dimensX + 1);
+                }
+
+                if (column > 0) {
+                    //Left
+                    blacklisted.add(clickedTile - 1);
+                }
+
+                if (column < dimensX - 1) {
+                    //Right
+                    blacklisted.add(clickedTile + 1);
+                }
+
+                if (column > 0 && row < dimensY - 1) {
+                    //Bottom left
+                    blacklisted.add(clickedTile + dimensX - 1);
+                }
+
+                if (column < dimensY - 1) {
+                    //Bottom
+                    blacklisted.add(clickedTile + dimensX);
+                }
+
+                if (column < dimensX - 1 && row < dimensY - 1) {
+                    //Bottom right
+                    blacklisted.add(clickedTile + dimensX + 1);
+                }
+
+                for (int i = 0; i < numTiles; i++) {
                     boolean viableTile = true;
-                    for (int value : blacklisted) {
-                        if (value == i) {
+                    for (int value = 0; value < blacklisted.size(); value++) {
+                        if (i == blacklisted.get(value)) {
                             viableTile = false;
                             break;
                         }
@@ -205,18 +259,18 @@ public class Game extends AppCompatActivity {
 
                 gameHasStarted = true;
             }
+
+            clearOpenTiles(Integer.parseInt(v.getTag().toString()), row, column);
+
+
         } else {
-            if (flagMode == true) {
-                //adding flag code here
+            if (tileObjects[clickedTile].isDark()) {
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.dark_green_tile));
             } else {
-                if (tileObjects[Integer.parseInt(v.getTag().toString())].getHasMine()) {
-                    //Toast.makeText(this, "Mine!", Toast.LENGTH_SHORT).show();
-                } else {
-                    //Toast.makeText(this, String.valueOf(tileObjects[Integer.parseInt(v.getTag().toString()) - 1].getNumSurroundingMines()), Toast.LENGTH_SHORT).show();
-                }
+                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.light_green_tile));
             }
+            tileObjects[clickedTile].setHasFlag(false);
         }
-        clearOpenTiles(Integer.parseInt(v.getTag().toString()), row, column);
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
@@ -244,6 +298,7 @@ public class Game extends AppCompatActivity {
             } else {
                 gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.eight));
             }
+            tileObjects[selectedTile].setCovered(false);
             tileObjects[selectedTile].setHasBeenChecked(true);
             for (int i = 0; i < tileObjects[selectedTile].getExistingNeighbors().size(); i++) {
                 if (!tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].hasBeenChecked() && tileObjects[selectedTile].getNumSurroundingMines() == 0) {
@@ -286,6 +341,7 @@ public class Game extends AppCompatActivity {
                         gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
                                 [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.eight));
                     }
+                    tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].setCovered(false);
                 }
             }
             if (tilesNeedingCheck.size() > spacesOpened) {
@@ -308,7 +364,7 @@ public class Game extends AppCompatActivity {
     private void scanForSurroundingTiles() {
         for (int i = 0; i < dimensY; i++) {
             for (int j = 0; j < dimensX; j++) {
-                int scanMineNumber = (i * dimensX) + j;
+                int scanMineNumber = coordsToNumber[j][i];
                 if (!tileObjects[scanMineNumber].getHasMine()) {
                     if (i > 0 && j > 0) {
                         //Top left
@@ -397,16 +453,6 @@ public class Game extends AppCompatActivity {
 
     private void gameOver() {
 
-    }
-
-    private void setFlagMode() {
-        flagMode = true;
-        shovelMode = false;
-    }
-
-    private void setShovelMode() {
-        flagMode = false;
-        shovelMode = true;
     }
 
 }
