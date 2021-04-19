@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Tile {
 
     private boolean hasMine;
+    private boolean hasFlag;
     private boolean isCovered;
     private int numSurroundingMines;
     private int dimensX;
@@ -12,10 +13,9 @@ public class Tile {
     private int column;
     private int row;
     private boolean hasBeenChecked;
+    private boolean isDark;
     private ArrayList<Integer> existingNeighbors;
     private ArrayList<Integer> cardinalNeighbors;
-    private boolean hasFlag;
-    private boolean isLight;
 
     public Tile(int tileNumber, int dimensX) {
         this.dimensX = dimensX;
@@ -23,21 +23,29 @@ public class Tile {
         column = tileNumber % dimensX;
         row = tileNumber / dimensX;
         hasMine = false;
-        isCovered = false;
+        isCovered = true;
         hasBeenChecked = false;
         numSurroundingMines = 0;
         existingNeighbors = new ArrayList<>();
         cardinalNeighbors = new ArrayList<>();
+        isDark = false;
         hasFlag = false;
-        isLight = false;
     }
 
-    public void setLight(boolean light) {
-        isLight = light;
+    public boolean getHasFlag() {
+        return hasFlag;
     }
 
-    public boolean isLight() {
-        return isLight;
+    public void setHasFlag(boolean hasFlag) {
+        this.hasFlag = hasFlag;
+    }
+
+    public boolean isDark() {
+        return isDark;
+    }
+
+    public void setDark(boolean dark) {
+        isDark = dark;
     }
 
     public void addExistingNeighbors(int neighborID) {
