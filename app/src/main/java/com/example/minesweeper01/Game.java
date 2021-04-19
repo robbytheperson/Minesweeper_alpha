@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Game extends AppCompatActivity {
+
     //h
 
     GridLayout grid;
