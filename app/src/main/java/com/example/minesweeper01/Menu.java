@@ -17,7 +17,7 @@ public class Menu extends AppCompatActivity {
     int difficulty;
 
     Button startButton, helpButton;
-
+    //
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
