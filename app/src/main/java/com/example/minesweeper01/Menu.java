@@ -17,7 +17,7 @@ public class Menu extends AppCompatActivity {
     int difficulty;
 
     Button startButton, helpButton;
-    //
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +49,7 @@ public class Menu extends AppCompatActivity {
 
     public void start(View v) {
             Intent startGameIntent = new Intent(Menu.this,Game.class);
-            startGameIntent.putExtra("difficulty",difficulty);
+            startGameIntent.putExtra("difficulty", difficulty);
             startActivity(startGameIntent);
     }
 
@@ -57,6 +57,11 @@ public class Menu extends AppCompatActivity {
     {
         Intent helpScreenIntent = new Intent(Menu.this, HowToPlay.class);
         startActivity(helpScreenIntent);
+    }
+
+    public void settingsScreen(View v) {
+        Intent settingsScreenIntent = new Intent(Menu.this, Settings.class);
+        startActivity(settingsScreenIntent);
     }
     //testing comment
 

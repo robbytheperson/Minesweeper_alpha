@@ -9,6 +9,7 @@
     <color name="lightGray">#666666</color>
     <color name="white">#FFFFFFFF</color>
     <color name="darkGreen">#A2D149</color>
+    <color name="candyRed">#FF0800</color>
     <color name="lightGreen">#AAD751</color>
     <color name="emptyDirt">#c9b985</color>
 </resources>
