@@ -104,21 +104,31 @@ public class Game extends AppCompatActivity {
 
     @SuppressLint("UseCompatLoadingForDrawables")
     public void createGrid() {
+        boolean skinnyEnough = false;
         gridWidth = (int) (screenWidth * sizeScaleFactorForWidth);
         gridHeight = (int) (Math.round((1.0 * gridWidth) * ((1.0 * dimensY) / (1.0 * dimensX))));
         if (gridHeight > (screenHeight * sizeScaleFactorForHeight)) {
             gridHeight = (int) (screenHeight * sizeScaleFactorForHeight);
             gridWidth = (int) (Math.round((1.0 * gridHeight) * ((1.0 * dimensX) / (1.0 * dimensY))));
         }
+        if (gridWidth < (screenWidth * 0.7)) {
+            skinnyEnough = true;
+        }
         ConstraintLayout constraintLayout = findViewById(R.id.constraintL);
         ConstraintSet constraintSet = new ConstraintSet();
         ConstraintLayout.LayoutParams gridParams = new ConstraintLayout.LayoutParams(gridWidth, gridHeight);
         grid.setLayoutParams(gridParams);
         constraintSet.clone(constraintLayout);
-        constraintSet.connect(R.id.tileGrid, ConstraintSet.TOP, R.id.constraintL, ConstraintSet.TOP, 0);
-        constraintSet.connect(R.id.tileGrid, ConstraintSet.LEFT, R.id.constraintL, ConstraintSet.LEFT, 0);
-        constraintSet.connect(R.id.tileGrid, ConstraintSet.BOTTOM, R.id.constraintL, ConstraintSet.BOTTOM, 0);
-        constraintSet.connect(R.id.tileGrid, ConstraintSet.RIGHT, R.id.constraintL, ConstraintSet.RIGHT, 0);
+        if (skinnyEnough) {
+            constraintSet.connect(R.id.tileGrid, ConstraintSet.LEFT, R.id.constraintL, ConstraintSet.LEFT, (int) (gridWidth * (1.0 / dimensX)));
+            constraintSet.connect(R.id.tileGrid, ConstraintSet.TOP, R.id.constraintL, ConstraintSet.TOP, 0);
+            constraintSet.connect(R.id.tileGrid, ConstraintSet.BOTTOM, R.id.constraintL, ConstraintSet.BOTTOM, 0);
+        }
+        else {
+            constraintSet.connect(R.id.tileGrid, ConstraintSet.LEFT, R.id.constraintL, ConstraintSet.LEFT, 0);
+            constraintSet.connect(R.id.tileGrid, ConstraintSet.RIGHT,R.id.constraintL,ConstraintSet.RIGHT, 0);
+            constraintSet.connect(R.id.tileGrid, ConstraintSet.BOTTOM, R.id.constraintL, ConstraintSet.BOTTOM, (int) (gridHeight * (0.75 / dimensY)));
+        }
         constraintSet.applyTo(constraintLayout);
         grid.setColumnCount(dimensX);
         grid.setRowCount(dimensY);
@@ -260,7 +270,7 @@ public class Game extends AppCompatActivity {
                 gameHasStarted = true;
             }
 
-            clearOpenTiles(Integer.parseInt(v.getTag().toString()), row, column);
+            clearOpenTiles(clickedTile, row, column);
 
 
         } else {
@@ -337,9 +347,6 @@ public class Game extends AppCompatActivity {
                     } else if (tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getNumSurroundingMines() == 7) {
                         gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
                                 [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.seven));
-                    } else if (tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getNumSurroundingMines() == 8) {
-                        gridButtons[tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getColumn()]
-                                [tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].getRow()].setBackground(getResources().getDrawable(R.drawable.eight));
                     }
                     tileObjects[tileObjects[selectedTile].getExistingNeighbors().get(i)].setCovered(false);
                 }
@@ -351,10 +358,21 @@ public class Game extends AppCompatActivity {
                 row = tileObjects[selectedTile].getRow();
                 if (spacesOpened <= tilesNeedingCheck.size()) {
                     clearOpenTiles(selectedTile, row, column);
-                } else {
+                }
+                else {
                     spacesOpened = 0;
                     tilesNeedingCheck.clear();
                 }
+            }
+            int score = 0;
+            for (int index = 0; index < tileObjects.length; index++)
+            {
+                if (!tileObjects[index].getIsCovered()) {
+                    score++;
+                }
+            }
+            if (score == numTiles - numMines) {
+                Toast.makeText(this, "You win. :|", Toast.LENGTH_SHORT).show();
             }
         }
         //Toast.makeText(this, "This tile " + "(" + selectedTile + ")" + " has already already been checked.", Toast.LENGTH_SHORT).show();
