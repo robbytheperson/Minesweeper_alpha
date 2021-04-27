@@ -21,6 +21,8 @@ import java.util.Collections;
 
 public class Game extends AppCompatActivity {
 
+    //h
+
     GridLayout grid;
 
     int difficulty;
@@ -60,9 +62,6 @@ public class Game extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         display = getWindowManager().getDefaultDisplay();
         displayMetrics = new DisplayMetrics();
