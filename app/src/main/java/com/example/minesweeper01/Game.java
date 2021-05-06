@@ -1,5 +1,7 @@
 package com.example.minesweeper01;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -8,6 +10,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
@@ -17,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Game extends AppCompatActivity {
+
+    //h
 
     GridLayout grid;
 
@@ -88,6 +93,16 @@ public class Game extends AppCompatActivity {
 
         grid = findViewById(R.id.tileGrid);
         createGrid();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 
