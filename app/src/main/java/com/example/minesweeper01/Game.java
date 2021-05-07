@@ -21,8 +21,6 @@ import java.util.Collections;
 
 public class Game extends AppCompatActivity {
 
-    //h
-
     GridLayout grid;
 
     int difficulty;
@@ -57,6 +55,10 @@ public class Game extends AppCompatActivity {
     //Booleans for shovel and flag mode
     boolean shovelMode;
     boolean flagMode;
+
+    //Power-up things
+    int nukes;
+    int xrays;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -294,6 +296,19 @@ public class Game extends AppCompatActivity {
         if (!tileObjects[selectedTile].hasBeenChecked()) {
             if (tileObjects[selectedTile].getNumSurroundingMines() == 0) {
                 gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.zero));
+                int i = (int)(Math.random() * 10);
+                if(i == 1)
+                {
+                    int x = (int)(Math.random() * 2);
+                    if(x == 0)
+                    {
+                        xrays++;
+                    }
+                    else
+                    {
+                        nukes++;
+                    }
+                }
             } else if (tileObjects[selectedTile].getNumSurroundingMines() == 1) {
                 gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.one));
             } else if (tileObjects[selectedTile].getNumSurroundingMines() == 2) {
@@ -468,6 +483,54 @@ public class Game extends AppCompatActivity {
 
     private void gameOver() {
 
+    }
+
+    private void useXray()
+    {
+        if(xrays <= 0)
+        {
+            //pop
+        }
+        else
+        {
+           /*for (the array) {
+                if (!tile[i].hasBeenChecked) {
+                    add that tile to the arraylist
+                    if (it has 1 mine) {
+                    replace with 1
+                    }
+                    if (it has 2 mines)
+                    so on
+
+                }
+                }
+
+                wait 1.5 seconds
+
+                {
+                     for (arraylist)
+                     {
+                        if (islight) cover with light
+                        else cover with dark
+                   }
+                }
+
+}
+        */
+            xrays--;
+        }
+    }
+
+    private void useNuke()
+    {
+        if(nukes <= 0)
+        {
+            //pop
+        }
+        else {
+            
+            nukes--;
+        }
     }
 
 }
