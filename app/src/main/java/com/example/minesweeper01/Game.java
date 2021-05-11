@@ -59,6 +59,7 @@ public class Game extends AppCompatActivity {
     //Power-up things
     int nukes;
     int xrays;
+    boolean nextClickNuke = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -214,79 +215,85 @@ public class Game extends AppCompatActivity {
 
     public void clickMethod(View v, int row, int column) {
         int clickedTile = Integer.parseInt(v.getTag().toString());
-        if (!tileObjects[clickedTile].getHasFlag()) {
-            if (!gameHasStarted) {
-                blacklisted.add(clickedTile);
+        if(nextClickNuke == true)
+        {
 
-                if (column > 0 && row > 0) {
-                    //Top left
-                    blacklisted.add(clickedTile - dimensX - 1);
-                }
+        }
+        else {
+            if (!tileObjects[clickedTile].getHasFlag()) {
+                if (!gameHasStarted) {
+                    blacklisted.add(clickedTile);
 
-                if (row > 0) {
-                    //Top
-                    blacklisted.add(clickedTile - dimensX);
-                }
+                    if (column > 0 && row > 0) {
+                        //Top left
+                        blacklisted.add(clickedTile - dimensX - 1);
+                    }
 
-                if (column < dimensX - 1 && row > 0) {
-                    //Top right
-                    blacklisted.add(clickedTile - dimensX + 1);
-                }
+                    if (row > 0) {
+                        //Top
+                        blacklisted.add(clickedTile - dimensX);
+                    }
 
-                if (column > 0) {
-                    //Left
-                    blacklisted.add(clickedTile - 1);
-                }
+                    if (column < dimensX - 1 && row > 0) {
+                        //Top right
+                        blacklisted.add(clickedTile - dimensX + 1);
+                    }
 
-                if (column < dimensX - 1) {
-                    //Right
-                    blacklisted.add(clickedTile + 1);
-                }
+                    if (column > 0) {
+                        //Left
+                        blacklisted.add(clickedTile - 1);
+                    }
 
-                if (column > 0 && row < dimensY - 1) {
-                    //Bottom left
-                    blacklisted.add(clickedTile + dimensX - 1);
-                }
+                    if (column < dimensX - 1) {
+                        //Right
+                        blacklisted.add(clickedTile + 1);
+                    }
 
-                if (column < dimensY - 1) {
-                    //Bottom
-                    blacklisted.add(clickedTile + dimensX);
-                }
+                    if (column > 0 && row < dimensY - 1) {
+                        //Bottom left
+                        blacklisted.add(clickedTile + dimensX - 1);
+                    }
 
-                if (column < dimensX - 1 && row < dimensY - 1) {
-                    //Bottom right
-                    blacklisted.add(clickedTile + dimensX + 1);
-                }
+                    if (column < dimensY - 1) {
+                        //Bottom
+                        blacklisted.add(clickedTile + dimensX);
+                    }
 
-                for (int i = 0; i < numTiles; i++) {
-                    boolean viableTile = true;
-                    for (int value = 0; value < blacklisted.size(); value++) {
-                        if (i == blacklisted.get(value)) {
-                            viableTile = false;
-                            break;
+                    if (column < dimensX - 1 && row < dimensY - 1) {
+                        //Bottom right
+                        blacklisted.add(clickedTile + dimensX + 1);
+                    }
+
+                    for (int i = 0; i < numTiles; i++) {
+                        boolean viableTile = true;
+                        for (int value = 0; value < blacklisted.size(); value++) {
+                            if (i == blacklisted.get(value)) {
+                                viableTile = false;
+                                break;
+                            }
+                        }
+                        if (viableTile) {
+                            viableTiles.add(i);
                         }
                     }
-                    if (viableTile) {
-                        viableTiles.add(i);
-                    }
+
+                    generateMines();
+                    scanForSurroundingTiles();
+
+                    gameHasStarted = true;
                 }
 
-                generateMines();
-                scanForSurroundingTiles();
-
-                gameHasStarted = true;
-            }
-
-            clearOpenTiles(Integer.parseInt(v.getTag().toString()), row, column);
+                clearOpenTiles(Integer.parseInt(v.getTag().toString()), row, column);
 
 
-        } else {
-            if (tileObjects[clickedTile].isDark()) {
-                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.dark_green_tile));
             } else {
-                gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.light_green_tile));
+                if (tileObjects[clickedTile].isDark()) {
+                    gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.dark_green_tile));
+                } else {
+                    gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.light_green_tile));
+                }
+                tileObjects[clickedTile].setHasFlag(false);
             }
-            tileObjects[clickedTile].setHasFlag(false);
         }
     }
 
@@ -528,7 +535,7 @@ public class Game extends AppCompatActivity {
             //pop
         }
         else {
-            
+
             nukes--;
         }
     }
