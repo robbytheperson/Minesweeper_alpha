@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Game extends AppCompatActivity {
-    
+
 
     GridLayout grid;
 
@@ -64,7 +64,7 @@ public class Game extends AppCompatActivity {
 
         display = getWindowManager().getDefaultDisplay();
         displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        display.getMetrics(displayMetrics);
         screenWidth = displayMetrics.widthPixels;
         screenHeight = displayMetrics.heightPixels;
 
