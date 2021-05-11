@@ -6,10 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
-
-import java.io.InputStream;
 
 public class Menu extends AppCompatActivity {
 
@@ -17,7 +14,7 @@ public class Menu extends AppCompatActivity {
     int difficulty;
 
     Button startButton, helpButton;
-    //
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,14 +46,21 @@ public class Menu extends AppCompatActivity {
 
     public void start(View v) {
             Intent startGameIntent = new Intent(Menu.this,Game.class);
-            startGameIntent.putExtra("difficulty",difficulty);
+            startGameIntent.putExtra("difficulty", difficulty);
             startActivity(startGameIntent);
     }
 
     public void helpScreen(View v)
     {
         Intent helpScreenIntent = new Intent(Menu.this, HowToPlay.class);
+        helpScreenIntent.putExtra("difficulty", difficulty);
         startActivity(helpScreenIntent);
+    }
+
+    public void settingsScreen(View v) {
+        Intent settingsScreenIntent = new Intent(Menu.this, Settings.class);
+        settingsScreenIntent.putExtra("difficulty", difficulty);
+        startActivity(settingsScreenIntent);
     }
     //testing comment
 
