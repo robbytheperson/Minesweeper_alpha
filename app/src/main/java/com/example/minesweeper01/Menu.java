@@ -12,11 +12,8 @@ import android.util.TypedValue;
 import android.view.Display;
 import android.view.View;
 import android.widget.Button;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
-
-import java.io.InputStream;
 
 public class Menu extends AppCompatActivity {
 
@@ -108,11 +105,13 @@ public class Menu extends AppCompatActivity {
     public void helpScreen(View v)
     {
         Intent helpScreenIntent = new Intent(Menu.this, HowToPlay.class);
+        helpScreenIntent.putExtra("difficulty", difficulty);
         startActivity(helpScreenIntent);
     }
 
     public void settingsScreen(View v) {
         Intent settingsScreenIntent = new Intent(Menu.this, Settings.class);
+        settingsScreenIntent.putExtra("difficulty", difficulty);
         startActivity(settingsScreenIntent);
     }
     //testing comment
