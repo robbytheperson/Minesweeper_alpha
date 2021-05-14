@@ -57,9 +57,10 @@ public class Game extends AppCompatActivity {
     boolean flagMode;
 
     //Power-up things
-    int nukes;
+    int nukes = 100;
     int xrays;
     boolean nextClickNuke = false;
+    Button nukeButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +72,7 @@ public class Game extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         screenWidth = displayMetrics.widthPixels;
         screenHeight = displayMetrics.heightPixels;
+        nukeButton = findViewById(R.id.nukeButton);
 
 
         dimensX = 9;
@@ -217,7 +219,13 @@ public class Game extends AppCompatActivity {
         int clickedTile = Integer.parseInt(v.getTag().toString());
         if(nextClickNuke == true)
         {
-
+            for(int i = 0; i < dimensX; i++)
+            {
+                if (!tileObjects[coordsToNumber[i][row]].getHasMine()) {
+                    clearOpenTiles(coordsToNumber[i][row], row, i);
+                }
+            }
+            nextClickNuke = false;
         }
         else {
             if (!tileObjects[clickedTile].getHasFlag()) {
@@ -528,14 +536,14 @@ public class Game extends AppCompatActivity {
         }
     }
 
-    private void useNuke()
+    public void useNuke(View view)
     {
-        if(nukes <= 0)
+        if(nukes <= 0 || nextClickNuke == true)
         {
             //pop
         }
         else {
-
+            nextClickNuke = true;
             nukes--;
         }
     }
