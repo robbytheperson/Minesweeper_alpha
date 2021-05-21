@@ -1,0 +1,15 @@
+Index: app/src/main/java/com/example/minesweeper01/Game.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/minesweeper01/Game.java	(revision d71a7fbe6897d83ebf537c72580ae89c0d2af6d2)
++++ app/src/main/java/com/example/minesweeper01/Game.java	(date 1616186803574)
+@@ -39,6 +39,7 @@
+ 
+     boolean colorController;
+     boolean gameHasStarted;
++    boolean shovelBeingUsed;
+ 
+     int[] blacklisted;
+     int[] minePlacements;

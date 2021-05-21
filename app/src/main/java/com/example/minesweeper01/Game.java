@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintSet;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.MenuItem;
@@ -58,7 +59,7 @@ public class Game extends AppCompatActivity {
 
     //Power-up things
     int nukes = 100;
-    int xrays;
+    int xrays = 100;
     boolean nextClickNuke = false;
     Button nukeButton;
 
@@ -120,7 +121,6 @@ public class Game extends AppCompatActivity {
             numMines = (int) (dimensX * dimensY * 0.2);
         }
     }
-
 
     @SuppressLint("UseCompatLoadingForDrawables")
     public void createGrid() {
@@ -217,17 +217,14 @@ public class Game extends AppCompatActivity {
 
     public void clickMethod(View v, int row, int column) {
         int clickedTile = Integer.parseInt(v.getTag().toString());
-        if(nextClickNuke == true)
-        {
-            for(int i = 0; i < dimensX; i++)
-            {
+        if (nextClickNuke) {
+            for (int i = 0; i < dimensX; i++) {
                 if (!tileObjects[coordsToNumber[i][row]].getHasMine()) {
                     clearOpenTiles(coordsToNumber[i][row], row, i);
                 }
             }
             nextClickNuke = false;
-        }
-        else {
+        } else {
             if (!tileObjects[clickedTile].getHasFlag()) {
                 if (!gameHasStarted) {
                     blacklisted.add(clickedTile);
@@ -311,16 +308,12 @@ public class Game extends AppCompatActivity {
         if (!tileObjects[selectedTile].hasBeenChecked()) {
             if (tileObjects[selectedTile].getNumSurroundingMines() == 0) {
                 gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.zero));
-                int i = (int)(Math.random() * 10);
-                if(i == 1)
-                {
-                    int x = (int)(Math.random() * 2);
-                    if(x == 0)
-                    {
+                int i = (int) (Math.random() * 10);
+                if (i == 1) {
+                    int x = (int) (Math.random() * 2);
+                    if (x == 0) {
                         xrays++;
-                    }
-                    else
-                    {
+                    } else {
                         nukes++;
                     }
                 }
@@ -500,52 +493,85 @@ public class Game extends AppCompatActivity {
 
     }
 
-    private void useXray()
-    {
-        if(xrays <= 0)
-        {
+    @SuppressLint("UseCompatLoadingForDrawables")
+    public void useXray(View view) {
+        if (xrays <= 0) {
             //pop
-        }
-        else
-        {
-           /*for (the array) {
-                if (!tile[i].hasBeenChecked) {
-                    add that tile to the arraylist
-                    if (it has 1 mine) {
-                    replace with 1
+        } else {
+            for (int i = 0; i < numTiles; i++) {
+                if (tileObjects[i].getIsCovered()) {
+                    if (tileObjects[i].getNumSurroundingMines() == 0) {
+                        gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.zero));
+                    } else if (tileObjects[i].getNumSurroundingMines() == 1) {
+                        gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.one));
+                    } else if (tileObjects[i].getNumSurroundingMines() == 2) {
+                        gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.two));
+                    } else if (tileObjects[i].getNumSurroundingMines() == 3) {
+                        gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.three));
+                    } else if (tileObjects[i].getNumSurroundingMines() == 4) {
+                        gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.four));
+                    } else if (tileObjects[i].getNumSurroundingMines() == 5) {
+                        gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.five));
+                    } else if (tileObjects[i].getNumSurroundingMines() == 6) {
+                        gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.six));
+                    } else if (tileObjects[i].getNumSurroundingMines() == 7) {
+                        gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.seven));
+                    } else if (tileObjects[i].getNumSurroundingMines() == 8) {
+                        gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.eight));
+                    } else if (tileObjects[i].getNumSurroundingMines() == 9) {
+                        gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.topdown_mine_with_tile));
                     }
-                    if (it has 2 mines)
-                    so on
-
                 }
-                }
+            }
 
-                wait 1.5 seconds
 
+            wait(3000);
+            for (int i = 0; i < numTiles; i++) {
+                if (tileObjects[i].getIsCovered())
                 {
-                     for (arraylist)
-                     {
-                        if (islight) cover with light
-                        else cover with dark
-                   }
+                    if (tileObjects[i].isDark()) {
+                        if (!tileObjects[i].getHasFlag()) {
+                            gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.dark_green_tile));
+                        } else {
+                            gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.dark_green_flag));
+                        }
+                    }
+                    else {
+                        if (tileObjects[i].getHasFlag()) {
+                            gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.light_green_flag));
+                        } else {
+                            gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.light_green_tile));
+                        }
+                    }
                 }
-
-}
-        */
+            }
             xrays--;
         }
     }
 
-    public void useNuke(View view)
-    {
-        if(nukes <= 0 || nextClickNuke == true)
-        {
+    public void useNuke(View view) {
+        if (nukes <= 0 || nextClickNuke) {
             //pop
-        }
-        else {
+        } else {
             nextClickNuke = true;
             nukes--;
         }
+    }
+
+    public static void wait(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public int getRowFromNumber(int number) {
+        return number / dimensX;
+    }
+
+    public int getColumnFromNumber(int number) {
+        return number % dimensX;
     }
 
 }
