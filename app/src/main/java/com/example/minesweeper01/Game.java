@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintSet;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -305,6 +306,7 @@ public class Game extends AppCompatActivity {
     @SuppressLint("UseCompatLoadingForDrawables")
     private void clearOpenTiles(int selectedTile, int row, int column) {
 
+        int numTilesCovered = 0;
         if (!tileObjects[selectedTile].hasBeenChecked()) {
             if (tileObjects[selectedTile].getNumSurroundingMines() == 0) {
                 gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.zero));
@@ -394,9 +396,15 @@ public class Game extends AppCompatActivity {
                     tilesNeedingCheck.clear();
                 }
             }
+            for (int v = 0; v < numTiles; v++) {
+                if (tileObjects[v].getIsCovered()) {
+                    numTilesCovered++;
+                }
+            }
         }
-        //Toast.makeText(this, "This tile " + "(" + selectedTile + ")" + " has already already been checked.", Toast.LENGTH_SHORT).show();
-
+        if (numTilesCovered == numMines) {
+            Toast.makeText(this, "You win :|", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void scanForSurroundingTiles() {
@@ -523,29 +531,35 @@ public class Game extends AppCompatActivity {
                     }
                 }
             }
+            new CountDownTimer(3000, 1000){
+                @Override
+                public void onTick(long millisUntilFinished) {
 
-
-            wait(3000);
-            for (int i = 0; i < numTiles; i++) {
-                if (tileObjects[i].getIsCovered())
-                {
-                    if (tileObjects[i].isDark()) {
-                        if (!tileObjects[i].getHasFlag()) {
-                            gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.dark_green_tile));
-                        } else {
-                            gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.dark_green_flag));
-                        }
-                    }
-                    else {
-                        if (tileObjects[i].getHasFlag()) {
-                            gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.light_green_flag));
-                        } else {
-                            gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.light_green_tile));
-                        }
-                    }
                 }
-            }
-            xrays--;
+                @Override
+                public void onFinish() {
+                    for (int i = 0; i < numTiles; i++) {
+                        if (tileObjects[i].getIsCovered())
+                        {
+                            if (tileObjects[i].isDark()) {
+                                if (!tileObjects[i].getHasFlag()) {
+                                    gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.dark_green_tile));
+                                } else {
+                                    gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.dark_green_flag));
+                                }
+                            }
+                            else {
+                                if (tileObjects[i].getHasFlag()) {
+                                    gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.light_green_flag));
+                                } else {
+                                    gridButtons[getColumnFromNumber(i)][getRowFromNumber(i)].setBackground(getResources().getDrawable(R.drawable.light_green_tile));
+                                }
+                            }
+                        }
+                    }
+                    xrays--;
+                }
+            }.start();
         }
     }
 
