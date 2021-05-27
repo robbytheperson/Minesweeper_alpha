@@ -7,6 +7,8 @@ public class Tile {
     private boolean hasMine;
     private boolean hasFlag;
     private boolean isCovered;
+    private boolean hasNuke;
+    private boolean hasXray;
     private int numSurroundingMines;
     private int dimensX;
     private int tileNumber;
@@ -24,6 +26,8 @@ public class Tile {
         row = tileNumber / dimensX;
         hasMine = false;
         isCovered = true;
+        hasNuke = false;
+        hasXray = false;
         hasBeenChecked = false;
         numSurroundingMines = 0;
         existingNeighbors = new ArrayList<>();
@@ -78,6 +82,22 @@ public class Tile {
 
     public void setCovered(boolean covered) {
         isCovered = covered;
+    }
+
+    public boolean hasNuke() {
+        return hasNuke;
+    }
+
+    public void setHasNuke(boolean hasNuke) {
+        this.hasNuke = hasNuke;
+    }
+
+    public boolean hasXray() {
+        return hasXray;
+    }
+
+    public void setHasXray(boolean hasXray) {
+        this.hasXray = hasXray;
     }
 
     public boolean hasBeenChecked() {
