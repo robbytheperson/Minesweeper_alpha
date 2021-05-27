@@ -104,6 +104,7 @@ public class Game extends AppCompatActivity {
         tileObjects = new Tile[numTiles];
         colorController = true;
         gameHasStarted = false;
+        gameIsOver = false;
         shovelMode = true;
         flagMode = false;
         xrayIsOn = false;
@@ -382,6 +383,7 @@ public class Game extends AppCompatActivity {
                 gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.eight));
             } else {
                 gridButtons[column][row].setBackground(getResources().getDrawable(R.drawable.exploding_mine));
+                gameIsOver = true;
             }
             tileObjects[selectedTile].setCovered(false);
             tileObjects[selectedTile].setHasBeenChecked(true);
@@ -447,7 +449,7 @@ public class Game extends AppCompatActivity {
                 }
             }
         }
-        if (numTilesCovered == numMines) {
+        if (numTilesCovered == numMines && !gameIsOver) {
             Toast.makeText(this, "You win :|", Toast.LENGTH_SHORT).show();
         }
     }
@@ -542,7 +544,7 @@ public class Game extends AppCompatActivity {
         }
     }
 
-    private void gameOver() {
+    public void gameOver() {
 
     }
 
