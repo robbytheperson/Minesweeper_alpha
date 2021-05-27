@@ -5,23 +5,27 @@
     android:id="@+id/constraintL"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="5dp"
     tools:context=".Game">
 
-    <Button
-        android:id="@+id/nukeButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageView
+        android:id="@+id/xrayButton"
+        android:layout_width="60dp"
+        android:layout_height="50dp"
+        android:background="@drawable/grayscale_xray"
         android:onClick="useXray"
-        android:text="Button"
+        android:scaleType="fitStart"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
+    <ImageView
         android:id="@+id/nukeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="110dp"
+        android:layout_height="50dp"
+        android:background="@drawable/grayscale_nuke"
         android:onClick="useNuke"
-        android:text="Button"
+        android:paddingTop="5dp"
+        android:scaleType="fitEnd"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
