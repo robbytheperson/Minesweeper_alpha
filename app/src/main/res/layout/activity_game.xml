@@ -20,13 +20,16 @@
 
     <ImageView
         android:id="@+id/nukeButton"
-        android:layout_width="110dp"
+        android:layout_width="72dp"
         android:layout_height="50dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
         android:background="@drawable/grayscale_nuke"
         android:onClick="useNuke"
+        android:paddingLeft="5dp"
         android:paddingTop="5dp"
         android:scaleType="fitEnd"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/xrayButton"
         app:layout_constraintTop_toTopOf="parent" />
 
     <GridLayout
